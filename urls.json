@@ -1,5 +1,5 @@
 [
-  "https://naosi.org",
-  "https://www.mualliance.cn/archives/892",
-  "https://qustmc.aurelith.top"
+  { "name": "脑丝", "url": "https://naosi.org" },
+  { "name": "MU Alliance 社团页面", "url": "https://www.mualliance.cn/archives/892" },
+  { "name": "QUST Minecraft 社团", "url": "https://qustmc.aurelith.top" }
 ]
