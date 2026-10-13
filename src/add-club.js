@@ -32,7 +32,10 @@ export async function addClub(request, env) {
         body: "收录类型："+(type === "group" ? "QQ群聊" : "网站")+"\n学校/单位："+organization+"\n群号："+qqNumber+"\n关键词："+keywords.join(", ")+"\n\n审核通过后可使用以下记录：\n\x60\x60\x60json\n"+JSON.stringify(club,null,2)+"\n\x60\x60\x60\n\n"+"来自网站的社群收录申请，请管理员审核。此申请不会自动修改列表。\n\n社群名称（JSON）：\n    " + JSON.stringify(club.name) + "\n\n社群简介（JSON）：\n    " + JSON.stringify(description) + "\n\n社群链接（JSON）：\n    " + JSON.stringify(club.url) + "\n\n审核通过后，请手动将记录加入 urls.json，再关闭此 Issue。"
       })
     });
-    if (!issue.ok) return message("申请提交失败，请稍后再试。",502);
+    if (!issue.ok) {
+      const hints = {401:"GitHub 令牌无效或已过期，请管理员更新 GITHUB_WRITE_TOKEN。",403:"GitHub 拒绝创建 Issue，请检查令牌的 Issues 写入权限、仓库授权或请求额度。",404:"令牌无法访问目标仓库，请确认授权包含私有仓库 Suncloyum/NaiLongShe。",422:"GitHub 拒绝申请内容，或提交过于频繁，请稍后重试。"};
+      return message("申请提交失败：" + (hints[issue.status] || "GitHub 服务暂时不可用，请稍后重试。") + "（GitHub HTTP " + issue.status + "）",502);
+    }
     return message("申请已提交，等待管理员审核。审核通过后才会加入社群列表。",201);
   } catch { return message("暂时无法保存，请稍后再试。",502); }
 }
