@@ -2,8 +2,11 @@ import entries from "../urls.json" with { type: "json" };
 import { normalizeClubs } from "./index.js";
 
 const endpoint = "https://api.github.com/repos/Suncloyum/NaiLongShe/issues";
-function message(text, status) {
-  return new Response('<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>添加社群</title><body style="font-family:system-ui;background:#f6f7ee;padding:40px;line-height:1.8"><h1>添加社群</h1><p>'+text+'</p><a href="/">返回社群列表</a></body></html>', {status,headers:{"Content-Type":"text/html; charset=utf-8","Cache-Control":"no-store"}});
+function message(text, status, code = "") {
+  const errors = {400:["FORM_INVALID","输入内容不符合要求，请修改后提交。"],403:["SOURCE_INVALID","请返回首页刷新后提交；若仍失败，请将错误编号发给管理员。"],409:["ALREADY_LISTED","该链接已收录，无需重复申请。"],413:["FORM_TOO_LARGE","请缩短输入内容后重试。"],503:["TOKEN_NOT_CONFIGURED","管理员需要在 Worker 中配置 GITHUB_WRITE_TOKEN。"],502:["GITHUB_UNAVAILABLE","请将本页错误详情和编号发给管理员。"]};
+  const info = errors[status];
+  const detail = info ? '<p><strong>错误编号：' + (code || info[0]) + '</strong></p><p>' + info[1] + '</p>' : "";
+  return new Response('<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>添加社群</title><body style="font-family:system-ui;background:#f6f7ee;padding:40px;line-height:1.8"><h1>添加社群</h1><p>'+text+'</p>'+detail+'<a href="/">返回社群列表</a></body></html>', {status,headers:{"Content-Type":"text/html; charset=utf-8","Cache-Control":"no-store"}});
 }
 export async function addClub(request, env) {
   const target = new URL(request.url).origin;
@@ -43,8 +46,8 @@ export async function addClub(request, env) {
     });
     if (!issue.ok) {
       const hints = {401:"GitHub 令牌无效或已过期，请管理员更新 GITHUB_WRITE_TOKEN。",403:"GitHub 拒绝创建 Issue，请检查令牌的 Issues 写入权限、仓库授权或请求额度。",404:"令牌无法访问目标仓库，请确认授权包含私有仓库 Suncloyum/NaiLongShe。",422:"GitHub 拒绝申请内容，或提交过于频繁，请稍后重试。"};
-      return message("申请提交失败：" + (hints[issue.status] || "GitHub 服务暂时不可用，请稍后重试。") + "（GitHub HTTP " + issue.status + "）",502);
+      return message("申请提交失败：" + (hints[issue.status] || "GitHub 服务暂时不可用，请稍后重试。") + "（GitHub HTTP " + issue.status + "）",502,"GITHUB_HTTP_" + issue.status);
     }
     return message("申请已提交，等待管理员审核。审核通过后才会加入社群列表。",201);
-  } catch { return message("暂时无法保存，请稍后再试。",502); }
+  } catch { return message("连接 GitHub 时发生网络异常，请稍后重试。",502,"GITHUB_NETWORK_ERROR"); }
 }
