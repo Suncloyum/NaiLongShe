@@ -43,3 +43,5 @@ npx wrangler dev
 社群记录可添加 description、organization、qqNumber、keywords（字符串数组）、type（site 或 group）。首页可按名称、简介、学校/单位、关键词、群号和链接搜索，并按网站/QQ群聊筛选。滚动列表与随机访问共享筛选结果。
 
 界面和提交字段参考 https://github.com/TomyJan/NaiList，自行实现于 Cloudflare Worker；保留 Issue 人工审核，不使用参考项目的 PostgreSQL、登录系统或直接入库流程。页面右下角标明参考项目与本站仓库。QQ群分享文本可提取 HTTPS 链接，暂不提供二维码图片识别。
+
+当前提交方式为 PR：申请创建独立 applications 分支，修改 urls.json，并向 main 创建 Pull Request。审核合并后自动部署。Worker 的 GITHUB_WRITE_TOKEN 必须具有本仓库 Contents 和 Pull requests 的 Read and write 权限。

@@ -30,16 +30,16 @@ assert.equal((await addClub(post({name:"测试名称",description:"社团",url:"
 const originalFetch = globalThis.fetch;
 let written;
 globalThis.fetch = async (url, options) => {
- assert.equal(url,"https://api.github.com/repos/Suncloyum/NaiLongShe/issues");
- assert.equal(options.method,"POST");
- written=JSON.parse(options.body);
- return Response.json({number:123},{status:201});
+ if(url.includes("/git/ref/")) return Response.json({object:{sha:"base"}});
+ if(url.includes("/contents/") && options.method === "GET") return Response.json({sha:"file-sha",content:Buffer.from(JSON.stringify(entries)).toString("base64")});
+ if(url.endsWith("/pulls")) {written=JSON.parse(options.body);return Response.json({number:123},{status:201});}
+ return Response.json({});
 };
 try {
- assert.equal((await addClub(post({name:"测试名称",description:"测试社群",url:"https://example.com"}),{GITHUB_WRITE_TOKEN:"test"})).status,201);
+ assert.equal((await addClub(post({name:"测试名称",description:"简介",url:"https://example.com"}),{GITHUB_WRITE_TOKEN:"test"})).status,201);
  assert.equal(written.title,"[社群申请] 测试名称");
- assert.ok(written.body.includes("https://example.com/"));
- assert.equal((await addClub(post({name:"测试名称",description:"重复",url:clubs[0].url}),{GITHUB_WRITE_TOKEN:"test"})).status,409);
+ assert.equal(written.base,"main");
+ assert.equal((await addClub(post({name:"重复",url:clubs[0].url}),{GITHUB_WRITE_TOKEN:"test"})).status,409);
 } finally {globalThis.fetch=originalFetch;}
 assert.match(html,/name="description"/);
 assert.match(html,/action="\/clubs" method="post"/);
