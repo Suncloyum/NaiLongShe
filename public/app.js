@@ -12,7 +12,7 @@ async function search() {
     const doc = new DOMParser().parseFromString(await response.text(), "text/html");
     document.querySelector(".list").replaceWith(doc.querySelector(".list"));
     document.querySelector(".count").textContent = doc.querySelector(".count").textContent;
-    document.querySelector(".random .button").href = doc.querySelector(".random .button").getAttribute("href");
+    for (const name of ["random-site","random-group","random-all"]) document.querySelector("."+name).href = doc.querySelector("."+name).getAttribute("href");
     history.replaceState(null, "", "/?" + params);
   } catch (error) {
     if (error.name !== "AbortError") {
