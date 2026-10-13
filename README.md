@@ -22,3 +22,7 @@
 网页申请通过 PR 审核，合并后自动更新,可在界面内填写或自行提交PR。
 
 - 壁纸来自 [Nailong-Studio/wallpaper](https://github.com/Nailong-Studio/wallpaper)。
+
+## 许可证
+
+本项目代码采用 [WTFPL](LICENSE)。第三方图片遵循其原有授权。
