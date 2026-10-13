@@ -11,7 +11,7 @@ assert.equal((html.match(/class="club"/g)||[]).length,clubs.length);
 for(let i=0;i<(clubs.length ? 30 : 0);i++){
  const r=await worker.fetch(new Request("https://example.test/random"));
  assert.equal(r.status,302);
- assert.ok(clubs.some(c=>c.url===r.headers.get("Location")));
+ assert.ok(clubs.some(c=>(c.url || "/?group="+encodeURIComponent(c.qqNumber))===r.headers.get("Location")));
  assert.equal(r.headers.get("Cache-Control"),"no-store");
 }
 assert.equal((await worker.fetch(new Request("https://example.test/missing"))).status,404);
@@ -40,7 +40,7 @@ try {
  assert.equal((await addClub(post({name:"测试名称",description:"简介",url:"https://example.com"}),{GITHUB_WRITE_TOKEN:"test"})).status,201);
  assert.equal(written.title,"[社群申请] 测试名称");
  assert.equal(written.base,"main");
- if(clubs.length) assert.equal((await addClub(post({name:"重复",url:clubs[0].url}),{GITHUB_WRITE_TOKEN:"test"})).status,409);
+ if(clubs.length) assert.equal((await addClub(post({name:"重复",url:clubs[0].url,type:clubs[0].type,qqNumber:clubs[0].qqNumber}),{GITHUB_WRITE_TOKEN:"test"})).status,409);
 } finally {globalThis.fetch=originalFetch;}
 assert.match(html,/name="description"/);
 assert.match(html,/action="\/clubs" method="post"/);
