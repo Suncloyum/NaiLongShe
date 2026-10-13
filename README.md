@@ -32,8 +32,8 @@ npx wrangler dev
 
 ## 网页添加社团
 
-列表下方“添加社团”提供简介和链接两项输入。简介用作列表展示名称；提交将直接写回 main 分支 urls.json，触发自动部署。
+列表下方“添加社团”提供简介和链接两项输入。简介用作列表展示名称；提交只创建 GitHub Issue，等待管理员审核，不修改 urls.json。审核通过后管理员手动加入列表。
 
-首次启用：在 GitHub Settings → Developer settings → Personal access tokens → Fine-grained tokens 创建仅限 NaiLongShe 仓库的令牌，权限为 Contents: Read and write。将令牌保存到 Cloudflare Worker 设置 → 变量和机密，名称 GITHUB_WRITE_TOKEN，类型 Secret。不要将令牌写到代码或聊天中。
+首次启用：在 GitHub Settings → Developer settings → Personal access tokens → Fine-grained tokens 创建仅限 NaiLongShe 仓库的令牌，权限为 Issues: Read and write（不需要 Contents 写权限）。将令牌保存到 Cloudflare Worker 设置 → 变量和机密，名称 GITHUB_WRITE_TOKEN，类型 Secret。不要将令牌写到代码或聊天中。
 
-令牌到期后需更新。未配置令牌时提交会提示功能正在配置中。链接仅允许 HTTP/HTTPS，拒绝重复链接并重试并发提交冲突。该入口对访问者开放，提交内容会公开展示；可从 GitHub 删除不需要的条目。
+令牌到期后需更新。未配置令牌时提交会提示功能正在配置中。链接仅允许 HTTP/HTTPS，拒绝重复链接并重试并发提交冲突。该入口对访问者开放，提交内容仅进入仓库 Issue，未经审核不会展示在首页。
