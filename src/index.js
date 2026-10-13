@@ -1,3 +1,4 @@
+import backgrounds from "../backgrounds.json" with { type: "json" };
 import { addClub } from "./add-club.js";
 import entries from "../urls.json" with { type: "json" };
 export function normalizeClubs(entries) {
@@ -13,7 +14,7 @@ export function normalizeClubs(entries) {
 const clubs = normalizeClubs(entries);
 const esc = s => s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 export function renderPage() {
-  const backgrounds = ["/images/scene.jpg", "/images/plush.jpg", "/images/nailong-icon.png"];
+
   const background = backgrounds[crypto.getRandomValues(new Uint32Array(1))[0] % backgrounds.length];
   const rows = clubs.map((c,i) => `<a class="club" href="${esc(c.url)}" target="_blank" rel="noopener noreferrer"><span class="number">${String(i+1).padStart(2,"0")}</span><span><strong>${esc(c.name)}</strong><small>${esc(new URL(c.url).hostname)}</small></span><span class="arrow" aria-hidden="true">↗</span></a>`).join("");
   const repeated = rows.replaceAll('class="club"', 'class="club-copy"').replaceAll('target="_blank"', 'tabindex="-1" target="_blank"');

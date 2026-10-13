@@ -3,3 +3,4 @@
 - plush.jpg：同仓库的 0766183aca93c5752c1934ea9aa86391f31796fc.jpg，裁剪奶龙区域
 - nailong-icon.png：nkxingxh/NailongDetection 的 images/logo.png，裁剪奶龙头像
 图片随 Worker 静态资源部署。每次加载首页随机选择一个背景，可能连续选中相同图片。
+首页背景来自 https://github.com/Nailong-Studio/wallpaper/tree/main/classic，全部 JPG 收录于 backgrounds.json。
