@@ -52,5 +52,5 @@ assert.equal(filterClubs(samples,"123456","group").length,1);
 assert.equal(filterClubs(samples,"","site").length,1);
 assert.equal(filterClubs(samples,"不存在").length,0);
 assert.equal((await worker.fetch(new Request("https://example.test/random?q=definitely-no-result"))).status,404);
-assert.match(html,/TomyJan\/NaiList/);
+assert.match(html,/background-switch/);
 console.log("关键词、类型筛选与随机访问空结果检查通过。");
