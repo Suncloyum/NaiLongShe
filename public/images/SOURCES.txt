@@ -1,0 +1,5 @@
+图片来源：
+- scene.jpg：whxoperator/nailongnaiwa 的 nailong_naiwa_10_demo/nailong/021697702C6C435DB551A735B36A02ED_0.jpg
+- plush.jpg：同仓库的 0766183aca93c5752c1934ea9aa86391f31796fc.jpg，裁剪奶龙区域
+- nailong-icon.png：nkxingxh/NailongDetection 的 images/logo.png，裁剪奶龙头像
+图片随 Worker 静态资源部署。每次加载首页随机选择一个背景，可能连续选中相同图片。
