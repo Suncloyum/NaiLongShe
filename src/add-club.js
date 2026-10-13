@@ -13,12 +13,16 @@ export async function addClub(request, env) {
   const origin = request.headers.get("Origin");
   const referer = request.headers.get("Referer");
   const site = request.headers.get("Sec-Fetch-Site");
-  const sameOrigin = value => {
-    try { return new URL(value).origin === target; } catch { return false; }
+  const allowed = new Set([new URL(target).hostname, "xn--yuso35evj0a.com", "www.xn--yuso35evj0a.com", "nailongshe-random-redirect.suncloyum.workers.dev"]);
+  const allowedSource = value => {
+    try { const u = new URL(value); return ["http:", "https:"].includes(u.protocol) && allowed.has(u.hostname); } catch { return false; }
   };
-  // URL parsing normalizes Chinese hostnames to their ASCII representation.
-  const trusted = origin ? sameOrigin(origin) : (referer ? sameOrigin(referer) : site === "same-origin");
-  if (!trusted) return message("请求来源无效，请从首页提交。",403);
+  const hasOrigin = origin && origin !== "null";
+  const trusted = hasOrigin ? allowedSource(origin) : (allowedSource(referer) || site === "same-origin");
+  if (!trusted) {
+    const escape = value => String(value || "未提供").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    return message("请求来源校验失败。校验详情：Origin=" + escape(origin) + "；Sec-Fetch-Site=" + escape(site) + "；目标=" + escape(target) + "。",403);
+  }
   if (!env.GITHUB_WRITE_TOKEN) return message("添加功能正在配置中，请稍后再试。",503);
   if (Number(request.headers.get("Content-Length")) > 8192) return message("输入内容过长。",413);
   const body = await request.text();
