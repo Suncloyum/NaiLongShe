@@ -60,7 +60,7 @@ export async function addClub(request, env) {
       const data=await api("/contents/"+encodeURI(f.path)+"?ref="+base);
       return JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(data.content.replace(/\s/g,"")),c=>c.charCodeAt(0))));
     }));
-    if(normalizeClubs(current).some(c=>c.url===club.url)) return message("这个社群链接已在列表中。",409);
+    if(normalizeClubs(current).some(c => (club.url && c.url === club.url) || (club.type === "group" && c.type === "group" && c.qqNumber === club.qqNumber))) return message("这个社群已在列表中（链接或QQ群号重复）。",409);
     const id=crypto.randomUUID();
     const branch="applications/"+id;
     await api("/git/refs","POST",{ref:"refs/heads/"+branch,sha:base});
