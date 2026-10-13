@@ -41,3 +41,44 @@ button.addEventListener("click",async()=>{
   } catch {button.textContent="重试切换 ↻";}
   finally {button.disabled=false;}
 });
+
+const application=document.querySelector('form[action="/clubs"]');
+function requirements(){
+ const group=application.elements.type.value==="group";
+ application.elements.qqNumber.required=group;
+ application.elements.url.required=!group;
+}
+application.elements.type.addEventListener("change",requirements);
+requirements();
+const dialog=document.querySelector("#group-dialog");
+document.querySelector("#close-group").addEventListener("click",()=>dialog.close());
+async function showGroup(group){
+ dialog.querySelector(".group-name").textContent=group.name;
+ dialog.querySelector(".group-description").textContent=group.description || "";
+ dialog.querySelector(".group-number").textContent="QQ群号："+group.qqNumber;
+ dialog.querySelector(".copy-status").textContent="正在复制群号…";
+ if(!dialog.open)dialog.showModal();
+ try{await navigator.clipboard.writeText(group.qqNumber);dialog.querySelector(".copy-status").textContent="已复制群号，请在QQ中搜索并申请加入。";}
+ catch{dialog.querySelector(".copy-status").textContent="自动复制失败，请手动复制上方群号。";}
+}
+document.addEventListener("click",event=>{
+ const card=event.target.closest("[data-qq]");
+ if(card?.dataset.qq){event.preventDefault();showGroup({name:card.dataset.name,description:card.dataset.description,qqNumber:card.dataset.qq});}
+});
+document.querySelector(".random-options").addEventListener("click",async event=>{
+ const link=event.target.closest("a");
+ if(!link)return;
+ event.preventDefault();
+ const tab=window.open("about:blank","_blank");
+ try{
+  const endpoint=new URL(link.href);endpoint.searchParams.set("format","json");
+  const response=await fetch(endpoint);
+  if(!response.ok)throw Error("暂无符合条件的社群");
+  const group=await response.json();
+  if(!group.url){tab?.close();await showGroup(group);}
+  else if(tab){tab.opener=null;tab.location.replace(group.url);}
+  else{alert("浏览器拦截了新标签页，请允许弹出窗口后重试。");}
+ }catch(error){tab?.close();alert(error.message);}
+});
+const groupQuery=new URLSearchParams(location.search).get("group");
+if(groupQuery){const card=Array.from(document.querySelectorAll("[data-qq]")).find(c=>c.dataset.qq===groupQuery);if(card)showGroup({name:card.dataset.name,description:card.dataset.description,qqNumber:groupQuery});}

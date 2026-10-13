@@ -17,7 +17,7 @@
 }
 ```
 
-`name` 和 `url` 必填。`type` 为 `site`（网站）或 `group`（QQ群聊）；可选填 `organization`（学校/单位）和 `qqNumber`（群号）。
+`name` 必填；网站必须填写 `url`，QQ群聊必须填写 `qqNumber`，群链接可留空。`type` 为 `site`（网站）或 `group`（QQ群聊）；可选填 `organization`（学校/单位）和 `qqNumber`（群号）。
 
 网页申请通过 PR 审核，合并后自动更新,可在界面内填写或自行提交PR。
 

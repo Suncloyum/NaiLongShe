@@ -29,17 +29,17 @@ export async function addClub(request, env) {
   if (body.length > 8192) return message("输入内容过长。",413);
   const form = new URLSearchParams(body);
   const name = (form.get("name") || "").trim(), description = (form.get("description") || "").trim(), url = (form.get("url") || "").trim();
-  if (!name || name.length > 80 || description.length > 120 || !url || url.length > 2048) return message("名称和链接必填；名称最多80字，简介选填、最多120字。",400);
+  if (!name || name.length > 80 || description.length > 120 || url.length > 2048) return message("名称必填；网站须填写链接，QQ群须填写群号；名称最多80字，简介选填、最多120字。",400);
   const type = form.get("type") === "group" ? "group" : "site";
   const organization = (form.get("organization") || "").trim(), qqNumber = (form.get("qqNumber") || "").trim(), rawKeywords = (form.get("keywords") || "").trim();
-  if (organization.length > 32 || rawKeywords.length > 128 || (qqNumber && !/^[0-9]{5,11}$/.test(qqNumber))) return message("请检查学校/单位、关键词长度，QQ群号须为5–11位数字。",400);
+  if (organization.length > 32 || rawKeywords.length > 128 || ((type === "group" || qqNumber) && !/^[0-9]{5,11}$/.test(qqNumber))) return message("请检查学校/单位、关键词长度，QQ群号须为5–11位数字。",400);
   const keywords = [...new Set(rawKeywords.split(/[,，]/).map(k=>k.trim()).filter(Boolean))];
   const extracted = url.match(/https:\/\/(?:qm\.qq\.com|qun\.qq\.com)\/[^\s，。；！、）)\]}>]+/)?.[0];
   let club;
   try { club = normalizeClubs([{name,url:extracted || url,description,organization,qqNumber,keywords,type}])[0]; } catch { return message("请填写有效的 http:// 或 https:// 社群链接。",400); }
   const headers = {Authorization:"Bearer "+env.GITHUB_WRITE_TOKEN,Accept:"application/vnd.github+json","User-Agent":"NaiLongShe-Worker","X-GitHub-Api-Version":"2022-11-28"};
   try {
-    if (normalizeClubs(entries).some(c => c.url === club.url)) return message("这个社群链接已在列表中。",409);
+    if (normalizeClubs(entries).some(c => (club.url && c.url === club.url) || (club.type === "group" && c.type === "group" && c.qqNumber === club.qqNumber))) return message("这个社群链接已在列表中。",409);
     const api = async (path, method = "GET", payload) => {
       const response = await fetch(endpoint + path,{method,headers:{...headers,"Content-Type":"application/json"},...(payload ? {body:JSON.stringify(payload)} : {})});
       if (!response.ok) {
