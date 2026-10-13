@@ -6,7 +6,7 @@ const home = await worker.fetch(new Request("https://example.test/"));
 assert.equal(home.status,200);
 assert.match(home.headers.get("Content-Type"),/text\/html/);
 const html = await home.text();
-assert.match(html,/href="\/random" target="_blank"/);
+assert.match(html,/href="\/random\?q=.*?" target="_blank"/);
 assert.equal((html.match(/class="club"/g)||[]).length,clubs.length);
 for(let i=0;i<30;i++){
  const r=await worker.fetch(new Request("https://example.test/random"));
@@ -44,3 +44,13 @@ try {
 assert.match(html,/name="description"/);
 assert.match(html,/action="\/clubs" method="post"/);
 console.log("社团提交、GitHub 保存及重复链接校验通过。");
+
+const {filterClubs} = await import("../src/index.js");
+const samples=normalizeClubs([{name:"校园群",url:"https://qm.qq.com/q/test",keywords:["Minecraft"],organization:"某大学",qqNumber:"123456",type:"group"},{name:"网站",url:"https://example.com",keywords:["绘画"]}]);
+assert.equal(filterClubs(samples,"minecraft").length,1);
+assert.equal(filterClubs(samples,"123456","group").length,1);
+assert.equal(filterClubs(samples,"","site").length,1);
+assert.equal(filterClubs(samples,"不存在").length,0);
+assert.equal((await worker.fetch(new Request("https://example.test/random?q=definitely-no-result"))).status,404);
+assert.match(html,/TomyJan\/NaiList/);
+console.log("关键词、类型筛选与随机访问空结果检查通过。");

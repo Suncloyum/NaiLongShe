@@ -37,3 +37,9 @@ npx wrangler dev
 首次启用：在 GitHub Settings → Developer settings → Personal access tokens → Fine-grained tokens 创建仅限 NaiLongShe 仓库的令牌，权限为 Issues: Read and write（不需要 Contents 写权限）。将令牌保存到 Cloudflare Worker 设置 → 变量和机密，名称 GITHUB_WRITE_TOKEN，类型 Secret。不要将令牌写到代码或聊天中。
 
 令牌到期后需更新。未配置令牌时提交会提示功能正在配置中。链接仅允许 HTTP/HTTPS，拒绝重复链接并重试并发提交冲突。该入口对访问者开放，提交内容仅进入仓库 Issue，未经审核不会展示在首页。
+
+## 关键词和搜索
+
+社群记录可添加 description、organization、qqNumber、keywords（字符串数组）、type（site 或 group）。首页可按名称、简介、学校/单位、关键词、群号和链接搜索，并按网站/QQ群聊筛选。滚动列表与随机访问共享筛选结果。
+
+界面和提交字段参考 https://github.com/TomyJan/NaiList，自行实现于 Cloudflare Worker；保留 Issue 人工审核，不使用参考项目的 PostgreSQL、登录系统或直接入库流程。页面右下角标明参考项目与本站仓库。QQ群分享文本可提取 HTTPS 链接，暂不提供二维码图片识别。
