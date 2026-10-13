@@ -8,7 +8,7 @@ assert.match(home.headers.get("Content-Type"),/text\/html/);
 const html = await home.text();
 assert.match(html,/href="\/random\?q=.*?" target="_blank"/);
 assert.equal((html.match(/class="club"/g)||[]).length,clubs.length);
-for(let i=0;i<30;i++){
+for(let i=0;i<(clubs.length ? 30 : 0);i++){
  const r=await worker.fetch(new Request("https://example.test/random"));
  assert.equal(r.status,302);
  assert.ok(clubs.some(c=>c.url===r.headers.get("Location")));
@@ -17,7 +17,7 @@ for(let i=0;i<30;i++){
 assert.equal((await worker.fetch(new Request("https://example.test/missing"))).status,404);
 assert.equal((await worker.fetch(new Request("https://example.test/",{method:"POST"}))).status,405);
 assert.equal(await (await worker.fetch(new Request("https://example.test/",{method:"HEAD"}))).text(),"");
-assert.throws(()=>normalizeClubs([]));
+assert.deepEqual(normalizeClubs([]),[]);
 assert.throws(()=>normalizeClubs([{name:"test",url:"javascript:alert(1)"}]));
 assert.throws(()=>normalizeClubs([{name:"",url:"https://example.com"}]));
 assert.equal(normalizeClubs(["https://example.com"])[0].name,"example.com");
@@ -40,7 +40,7 @@ try {
  assert.equal((await addClub(post({name:"测试名称",description:"简介",url:"https://example.com"}),{GITHUB_WRITE_TOKEN:"test"})).status,201);
  assert.equal(written.title,"[社群申请] 测试名称");
  assert.equal(written.base,"main");
- assert.equal((await addClub(post({name:"重复",url:clubs[0].url}),{GITHUB_WRITE_TOKEN:"test"})).status,409);
+ if(clubs.length) assert.equal((await addClub(post({name:"重复",url:clubs[0].url}),{GITHUB_WRITE_TOKEN:"test"})).status,409);
 } finally {globalThis.fetch=originalFetch;}
 assert.match(html,/name="description"/);
 assert.match(html,/action="\/clubs" method="post"/);

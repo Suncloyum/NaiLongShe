@@ -2,7 +2,7 @@ import backgrounds from "../backgrounds.json" with { type: "json" };
 import { addClub } from "./add-club.js";
 import entries from "../generated/communities.json" with { type: "json" };
 export function normalizeClubs(entries) {
-  if (!Array.isArray(entries) || !entries.length) throw new Error("urls.json 必须是非空数组");
+  if (!Array.isArray(entries)) throw new Error("社群数据必须是数组");
   return entries.map((entry, i) => {
     const c = typeof entry === "string" ? {name:new URL(entry).hostname,url:entry} : entry;
     if (!c || typeof c.name !== "string" || !c.name.trim() || typeof c.url !== "string" || /[\r\n]/.test(c.url)) throw new Error("第 "+(i+1)+" 项需要有效 name 和 url");

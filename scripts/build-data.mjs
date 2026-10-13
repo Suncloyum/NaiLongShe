@@ -1,7 +1,6 @@
 import { readdir, readFile, mkdir, writeFile } from "node:fs/promises";
 const root = new URL("../communities/", import.meta.url);
 const names = (await readdir(root)).filter(n=>n.endsWith(".json")).sort();
-if (!names.length) throw new Error("communities 目录不能为空");
 const entries = [];
 const seen = new Set();
 for (const name of names) {
