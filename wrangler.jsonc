@@ -1,4 +1,5 @@
 {
+  "build": { "command": "npm run build:data" },
   "name": "nailongshe-random-redirect",
   "main": "src/index.js",
   "compatibility_date": "2026-10-13",

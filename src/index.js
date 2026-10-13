@@ -1,6 +1,6 @@
 import backgrounds from "../backgrounds.json" with { type: "json" };
 import { addClub } from "./add-club.js";
-import entries from "../urls.json" with { type: "json" };
+import entries from "../generated/communities.json" with { type: "json" };
 export function normalizeClubs(entries) {
   if (!Array.isArray(entries) || !entries.length) throw new Error("urls.json 必须是非空数组");
   return entries.map((entry, i) => {

@@ -1,4 +1,4 @@
-import entries from "../urls.json" with { type: "json" };
+import entries from "../generated/communities.json" with { type: "json" };
 import { normalizeClubs } from "./index.js";
 
 const endpoint = "https://api.github.com/repos/Suncloyum/NaiLongShe";
@@ -47,14 +47,18 @@ export async function addClub(request, env) {
     };
     const main = await api("/git/ref/heads/main");
     const base = main.object.sha;
-    const file = await api("/contents/urls.json?ref=" + base);
-    const current = normalizeClubs(JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(file.content.replace(/\s/g,"")),c=>c.charCodeAt(0)))));
-    if(current.some(c=>c.url===club.url)) return message("这个社群链接已在列表中。",409);
-    const branch="applications/"+crypto.randomUUID();
+    const files = await api("/contents/communities?ref=" + base);
+    const current = await Promise.all(files.filter(f=>f.name.endsWith(".json")).map(async f=>{
+      const data=await api("/contents/"+encodeURI(f.path)+"?ref="+base);
+      return JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(data.content.replace(/\s/g,"")),c=>c.charCodeAt(0))));
+    }));
+    if(normalizeClubs(current).some(c=>c.url===club.url)) return message("这个社群链接已在列表中。",409);
+    const id=crypto.randomUUID();
+    const branch="applications/"+id;
     await api("/git/refs","POST",{ref:"refs/heads/"+branch,sha:base});
     let binary="";
-    for(const byte of new TextEncoder().encode(JSON.stringify([...current,club],null,2)+"\n")) binary+=String.fromCharCode(byte);
-    await api("/contents/urls.json","PUT",{message:"Propose community listing",content:btoa(binary),sha:file.sha,branch});
+    for(const byte of new TextEncoder().encode(JSON.stringify(club,null,2)+"\n")) binary+=String.fromCharCode(byte);
+    await api("/contents/communities/"+id+".json","PUT",{message:"Propose community listing",content:btoa(binary),branch});
     const pr = await api("/pulls","POST",{title:"[社群申请] "+club.name.replace(/[\r\n]/g," "),head:branch,base:"main",body:"来自网页的社群申请，请审核新增记录。合并后自动部署。\n\n"+JSON.stringify(club,null,2)});
     return message("申请已提交为 PR #"+pr.number+"，等待管理员审核合并。合并后才会加入列表。",201);
   } catch (error) { const status=error.status; return message(status ? "创建 PR 失败（GitHub HTTP "+status+"）。请检查令牌是否授权本仓库的 Contents 和 Pull requests 读写权限。" : "连接 GitHub 时发生网络异常，请稍后重试。",502,status ? "GITHUB_HTTP_"+status : "GITHUB_NETWORK_ERROR"); }

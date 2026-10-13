@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import entries from "../urls.json" with {type:"json"};
+import entries from "../generated/communities.json" with {type:"json"};
 import worker, {normalizeClubs} from "../src/index.js";
 const clubs = normalizeClubs(entries);
 const home = await worker.fetch(new Request("https://example.test/"));
@@ -31,7 +31,8 @@ const originalFetch = globalThis.fetch;
 let written;
 globalThis.fetch = async (url, options) => {
  if(url.includes("/git/ref/")) return Response.json({object:{sha:"base"}});
- if(url.includes("/contents/") && options.method === "GET") return Response.json({sha:"file-sha",content:Buffer.from(JSON.stringify(entries)).toString("base64")});
+ if(url.includes("/contents/communities?")) return Response.json(entries.map((c,i)=>({name:i+".json",path:"communities/"+i+".json"})));
+ if(url.includes("/contents/") && options.method === "GET") {const i=Number(url.match(/communities\/(\d+)/)[1]);return Response.json({content:Buffer.from(JSON.stringify(entries[i])).toString("base64")});}
  if(url.endsWith("/pulls")) {written=JSON.parse(options.body);return Response.json({number:123},{status:201});}
  return Response.json({});
 };

@@ -13,12 +13,12 @@
 
 ## 信息存放在哪里
 
-**已收录的全部社群保存在仓库根目录 main 分支的 urls.json。** 当前尚未改成每个社群一个文件的目录，也没有数据库。
+**已收录社群保存在 main 分支的 communities/ 目录，每个社群一个 JSON 文件。** 构建时自动汇总，没有数据库。
 
 | 位置 | 内容 |
 | --- | --- |
-| main 分支的 urls.json | 已审核、参与线上展示与随机访问的社群 |
-| applications/<随机ID> 分支的 urls.json | 尚待审核申请所提议的完整列表 |
+| main 分支的 communities/*.json | 已审核、参与线上展示与随机访问的社群 |
+| applications/<随机ID> 分支新增的 communities/<随机ID>.json | 尚待审核申请所提议的完整列表 |
 | 仓库 Pull Requests | 申请的资料说明、文件差异和审核记录 |
 | backgrounds.json | 随机背景图片路径列表 |
 | public/images/classic/ | 38 张背景图片 |
@@ -30,7 +30,7 @@
 
 ## 社群数据格式
 
-urls.json 是非空 JSON 数组，一项对应一个社群：
+communities/ 下每个 JSON 文件保存一个社群对象，例如 communities/naosi.json：
 
 ```json
 [
@@ -58,18 +58,18 @@ urls.json 是非空 JSON 数组，一项对应一个社群：
 
 旧的仅有 name/url 或字符串网址的条目兼容；没有填写简介的条目不会凭空生成简介。QQ群号用于展示和搜索，加群仍需要官方 HTTP/HTTPS 邀请链接。QQ 分享文本可自动提取其中的群链接。
 
-修改条目直接编辑相应对象，删除条目移除该对象，新增条目添加对象。中间项用逗号分隔，最后一项不能带逗号。
+修改社群编辑对应文件，删除社群删除文件，新增社群添加 JSON 文件。文件名建议使用英文简称；目录至少保留一个社群，构建会检查重复链接。generated/communities.json 是构建生成的汇总文件，不提交到仓库，不要手动编辑。
 
 ## 网页提交与 PR 审核
 
 1. 访客展开“添加社群”，填写名称、链接及可选资料。
 2. Worker 校验输入和已收录的重复链接，读取 main 分支最新列表。
-3. Worker 从 main 创建 applications/<随机ID> 分支，仅在该分支的 urls.json 追加记录。
+3. Worker 从 main 创建 applications/<随机ID> 分支，仅在该分支新增 communities/<随机ID>.json。
 4. 创建向 main 的 Pull Request，包含资料和文件差异。**此时不修改 main，社群不会上线。**
 5. 管理员在 Pull Requests 中审核。通过则合并 PR；拒绝则关闭 PR。
 6. 合并触发 GitHub Actions，检查成功后自动部署，新增社群进入展示与随机访问。
 
-多份申请修改同一个文件时可能产生合并冲突，审核者需要处理冲突、保留已合并的记录。合并后的申请分支可以删除。
+每份申请新增独立文件，减少并行申请的合并冲突。合并后的申请分支可以删除。
 
 当前申请通过 PR 审核，之前的 Issue 提交流程已停用。PR 检查只验证，不部署；部署只在 main 推送或手动运行时执行。
 

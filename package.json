@@ -3,8 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node scripts/check.mjs",
-    "deploy": "npm run check && wrangler deploy"
+    "check": "npm run build:data && node scripts/check.mjs",
+    "deploy": "npm run check && wrangler deploy",
+    "build:data": "node scripts/build-data.mjs"
   },
   "devDependencies": {
     "wrangler": "4.149.0"
