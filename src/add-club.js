@@ -6,7 +6,16 @@ function message(text, status) {
   return new Response('<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>添加社群</title><body style="font-family:system-ui;background:#f6f7ee;padding:40px;line-height:1.8"><h1>添加社群</h1><p>'+text+'</p><a href="/">返回社群列表</a></body></html>', {status,headers:{"Content-Type":"text/html; charset=utf-8","Cache-Control":"no-store"}});
 }
 export async function addClub(request, env) {
-  if (request.headers.get("Origin") !== new URL(request.url).origin) return message("请求来源无效，请从首页提交。",403);
+  const target = new URL(request.url).origin;
+  const origin = request.headers.get("Origin");
+  const referer = request.headers.get("Referer");
+  const site = request.headers.get("Sec-Fetch-Site");
+  const sameOrigin = value => {
+    try { return new URL(value).origin === target; } catch { return false; }
+  };
+  // URL parsing normalizes Chinese hostnames to their ASCII representation.
+  const trusted = origin ? sameOrigin(origin) : (referer ? sameOrigin(referer) : site === "same-origin");
+  if (!trusted) return message("请求来源无效，请从首页提交。",403);
   if (!env.GITHUB_WRITE_TOKEN) return message("添加功能正在配置中，请稍后再试。",503);
   if (Number(request.headers.get("Content-Length")) > 8192) return message("输入内容过长。",413);
   const body = await request.text();
