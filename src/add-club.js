@@ -42,7 +42,15 @@ export async function addClub(request, env) {
     if (normalizeClubs(entries).some(c => c.url === club.url)) return message("这个社群链接已在列表中。",409);
     const api = async (path, method = "GET", payload) => {
       const response = await fetch(endpoint + path,{method,headers:{...headers,"Content-Type":"application/json"},...(payload ? {body:JSON.stringify(payload)} : {})});
-      if (!response.ok) { const error=new Error("GitHub API"); error.status=response.status; throw error; }
+      if (!response.ok) {
+        const details = await response.json().catch(()=>({}));
+        const error=new Error("GitHub API");
+        error.status=response.status;
+        error.stage=path.startsWith("/pulls") ? "创建 PR" : path==="/git/refs" ? "创建申请分支" : method==="PUT" ? "写入社群文件" : "读取仓库数据";
+        error.reason=typeof details.message==="string" ? details.message.slice(0,300) : "未提供原因";
+        error.permissions=response.headers.get("x-accepted-github-permissions") || "";
+        throw error;
+      }
       return response.json();
     };
     const main = await api("/git/ref/heads/main");
@@ -61,5 +69,5 @@ export async function addClub(request, env) {
     await api("/contents/communities/"+id+".json","PUT",{message:"Propose community listing",content:btoa(binary),branch});
     const pr = await api("/pulls","POST",{title:"[社群申请] "+club.name.replace(/[\r\n]/g," "),head:branch,base:"main",body:"来自网页的社群申请，请审核新增记录。合并后自动部署。\n\n"+JSON.stringify(club,null,2)});
     return message("申请已提交为 PR #"+pr.number+"，等待管理员审核合并。合并后才会加入列表。",201);
-  } catch (error) { const status=error.status; return message(status ? "创建 PR 失败（GitHub HTTP "+status+"）。请检查令牌是否授权本仓库的 Contents 和 Pull requests 读写权限。" : "连接 GitHub 时发生网络异常，请稍后重试。",502,status ? "GITHUB_HTTP_"+status : "GITHUB_NETWORK_ERROR"); }
+  } catch (error) { const status=error.status; const escape=v=>String(v||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); return message(status ? escape(error.stage)+"失败（GitHub HTTP "+status+"）。GitHub 原因："+escape(error.reason)+(error.permissions ? "；此操作所需权限："+escape(error.permissions) : "")+"。请确认 Worker 保存的是更新后的 GitHub 令牌。" : "连接 GitHub 时发生网络异常，请稍后重试。",502,status ? "GITHUB_HTTP_"+status : "GITHUB_NETWORK_ERROR"); }
 }
