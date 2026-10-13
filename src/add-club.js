@@ -12,8 +12,8 @@ export async function addClub(request, env) {
   const body = await request.text();
   if (body.length > 8192) return message("输入内容过长。",413);
   const form = new URLSearchParams(body);
-  const name = (form.get("description") || "").trim(), url = (form.get("url") || "").trim();
-  if (!name || name.length > 120 || url.length > 2048) return message("请填写 1–120 字的社群简介和有效链接。",400);
+  const name = (form.get("name") || "").trim(), description = (form.get("description") || "").trim(), url = (form.get("url") || "").trim();
+  if (!name || name.length > 80 || !description || description.length > 120 || url.length > 2048) return message("请填写 1–80 字的名称、1–120 字的简介和有效链接。",400);
   let club;
   try { club = normalizeClubs([{name,url}])[0]; } catch { return message("请填写有效的 http:// 或 https:// 社群链接。",400); }
   const headers = {Authorization:"Bearer "+env.GITHUB_WRITE_TOKEN,Accept:"application/vnd.github+json","User-Agent":"NaiLongShe-Worker","X-GitHub-Api-Version":"2022-11-28"};
@@ -24,7 +24,7 @@ export async function addClub(request, env) {
       headers: {...headers, "Content-Type": "application/json"},
       body: JSON.stringify({
         title: "[社群申请] " + club.name.replace(/[\r\n]/g, " "),
-        body: "来自网站的社群收录申请，请管理员审核。此申请不会自动修改列表。\n\n社群简介（JSON）：\n    " + JSON.stringify(club.name) + "\n\n社群链接（JSON）：\n    " + JSON.stringify(club.url) + "\n\n审核通过后，请手动将记录加入 urls.json，再关闭此 Issue。"
+        body: "来自网站的社群收录申请，请管理员审核。此申请不会自动修改列表。\n\n社群名称（JSON）：\n    " + JSON.stringify(club.name) + "\n\n社群简介（JSON）：\n    " + JSON.stringify(description) + "\n\n社群链接（JSON）：\n    " + JSON.stringify(club.url) + "\n\n审核通过后，请手动将记录加入 urls.json，再关闭此 Issue。"
       })
     });
     if (!issue.ok) return message("申请提交失败，请稍后再试。",502);

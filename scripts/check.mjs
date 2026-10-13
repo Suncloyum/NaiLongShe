@@ -25,8 +25,8 @@ console.log("检查通过："+clubs.length+" 个社团，首页、随机跳转�
 
 const {addClub} = await import("../src/add-club.js");
 const post = (data) => new Request("https://example.test/clubs",{method:"POST",headers:{Origin:"https://example.test","Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams(data)});
-assert.equal((await addClub(post({description:"社团",url:"https://example.com"}),{})).status,503);
-assert.equal((await addClub(post({description:"社团",url:"javascript:alert(1)"}),{GITHUB_WRITE_TOKEN:"test"})).status,400);
+assert.equal((await addClub(post({name:"测试名称",description:"社团",url:"https://example.com"}),{})).status,503);
+assert.equal((await addClub(post({name:"测试名称",description:"社团",url:"javascript:alert(1)"}),{GITHUB_WRITE_TOKEN:"test"})).status,400);
 const originalFetch = globalThis.fetch;
 let written;
 globalThis.fetch = async (url, options) => {
@@ -36,10 +36,10 @@ globalThis.fetch = async (url, options) => {
  return Response.json({number:123},{status:201});
 };
 try {
- assert.equal((await addClub(post({description:"测试社群",url:"https://example.com"}),{GITHUB_WRITE_TOKEN:"test"})).status,201);
- assert.equal(written.title,"[社群申请] 测试社群");
+ assert.equal((await addClub(post({name:"测试名称",description:"测试社群",url:"https://example.com"}),{GITHUB_WRITE_TOKEN:"test"})).status,201);
+ assert.equal(written.title,"[社群申请] 测试名称");
  assert.ok(written.body.includes("https://example.com/"));
- assert.equal((await addClub(post({description:"重复",url:clubs[0].url}),{GITHUB_WRITE_TOKEN:"test"})).status,409);
+ assert.equal((await addClub(post({name:"测试名称",description:"重复",url:clubs[0].url}),{GITHUB_WRITE_TOKEN:"test"})).status,409);
 } finally {globalThis.fetch=originalFetch;}
 assert.match(html,/name="description"/);
 assert.match(html,/action="\/clubs" method="post"/);
