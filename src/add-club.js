@@ -13,10 +13,10 @@ export async function addClub(request, env) {
   if (body.length > 8192) return message("输入内容过长。",413);
   const form = new URLSearchParams(body);
   const name = (form.get("name") || "").trim(), description = (form.get("description") || "").trim(), url = (form.get("url") || "").trim();
-  if (!name || name.length > 80 || !description || description.length > 120 || url.length > 2048) return message("请填写 1–80 字的名称、1–120 字的简介和有效链接。",400);
+  if (!name || name.length > 80 || description.length > 120 || !url || url.length > 2048) return message("名称和链接必填；名称最多80字，简介选填、最多120字。",400);
   const type = form.get("type") === "group" ? "group" : "site";
   const organization = (form.get("organization") || "").trim(), qqNumber = (form.get("qqNumber") || "").trim(), rawKeywords = (form.get("keywords") || "").trim();
-  if (organization.length > 32 || rawKeywords.length > 128 || (type === "group" && !/^[0-9]{5,11}$/.test(qqNumber))) return message("请检查学校/单位、关键词长度，QQ群号须为5–11位数字。",400);
+  if (organization.length > 32 || rawKeywords.length > 128 || (qqNumber && !/^[0-9]{5,11}$/.test(qqNumber))) return message("请检查学校/单位、关键词长度，QQ群号须为5–11位数字。",400);
   const keywords = [...new Set(rawKeywords.split(/[,，]/).map(k=>k.trim()).filter(Boolean))];
   const extracted = url.match(/https:\/\/(?:qm\.qq\.com|qun\.qq\.com)\/[^\s，。；！、）)\]}>]+/)?.[0];
   let club;
